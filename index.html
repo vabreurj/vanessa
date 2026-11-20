@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icone.svg">
+<link rel="apple-touch-icon" href="icone.png">
+<meta name="theme-color" content="#87CEEB">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Jogo das Estrelas do João Miguel</title>
+<style>
+  body{margin:0;touch-action:manipulation;-webkit-user-select:none;background:#87CEEB;font-family:Arial,sans-serif;text-align:center;overflow:hidden}
+  h1{margin:8px;color:#fff;text-shadow:2px 2px #1e5aa8}
+  #placar{font-size:28px;color:#1e5aa8;font-weight:bold}
+  #campo{position:relative;width:min(95vw,700px);height:min(65vh,450px);margin:8px auto;background:#7ccf5b;border:6px solid #fff;border-radius:20px}
+  .coisa{position:absolute;font-size:48px;line-height:1;user-select:none}
+  #setas button{font-size:36px;width:70px;height:70px;margin:4px;border-radius:16px;border:none;background:#ffcc00}
+</style>
+</head>
+<body>
+<!-- ===== MUDE AQUI! Troque os desenhos (emojis) e o nome ===== -->
+<script>
+  const HEROI   = "🐶";   // o personagem do João
+  const PREMIO  = "⭐";   // o que ele pega
+  const VILAO   = "🐝";   // quem ele tem que evitar
+  const NOME    = "João Miguel";
+  const VELOCIDADE = 20;  // número maior = herói mais rápido
+</script>
+<!-- ============================================================ -->
+<h1 id="titulo"></h1>
+<div id="placar">Estrelas: 0</div>
+<div id="campo"></div>
+<div id="setas">
+  <button data-d="cima">⬆️</button><br>
+  <button data-d="esq">⬅️</button><button data-d="baixo">⬇️</button><button data-d="dir">➡️</button>
+</div>
+<script>
+const campo=document.getElementById('campo'),placar=document.getElementById('placar');
+document.getElementById('titulo').textContent="Aventura do "+NOME;
+function cria(e){const d=document.createElement('div');d.className='coisa';d.textContent=e;campo.appendChild(d);return d}
+const heroi=cria(HEROI),premio=cria(PREMIO),vilao=cria(VILAO);
+let hx=20,hy=20,vx=300,vy=200,dx=3,dy=2,pontos=0,px,py;
+const W=()=>campo.clientWidth-50,H=()=>campo.clientHeight-50;
+function poe(el,x,y){el.style.left=x+'px';el.style.top=y+'px'}
+function novoPremio(){px=Math.random()*W();py=Math.random()*H();poe(premio,px,py)}
+function perto(ax,ay,bx,by){return Math.abs(ax-bx)<40&&Math.abs(ay-by)<40}
+function anda(d){
+  if(d=='cima')hy-=VELOCIDADE; if(d=='baixo')hy+=VELOCIDADE;
+  if(d=='esq')hx-=VELOCIDADE; if(d=='dir')hx+=VELOCIDADE;
+  hx=Math.max(0,Math.min(W(),hx));hy=Math.max(0,Math.min(H(),hy));poe(heroi,hx,hy);
+  if(perto(hx,hy,px,py)){pontos++;placar.textContent="Estrelas: "+pontos;novoPremio();
+    if(pontos%5==0)placar.textContent+=" 🎉 Muito bem!"}
+}
+const teclas={ArrowUp:'cima',ArrowDown:'baixo',ArrowLeft:'esq',ArrowRight:'dir'};
+addEventListener('keydown',e=>{if(teclas[e.key]){e.preventDefault();anda(teclas[e.key])}});
+document.querySelectorAll('#setas button').forEach(b=>b.onclick=()=>anda(b.dataset.d));
+setInterval(()=>{vx+=dx;vy+=dy;if(vx<0||vx>W())dx=-dx;if(vy<0||vy>H())dy=-dy;poe(vilao,vx,vy);
+  if(perto(hx,hy,vx,vy)){pontos=0;placar.textContent="Ops! A abelha te pegou 🐝 Tenta de novo!";hx=20;hy=20;poe(heroi,hx,hy)}},30);
+poe(heroi,hx,hy);novoPremio();
+</script>
+</body>
+</html>
